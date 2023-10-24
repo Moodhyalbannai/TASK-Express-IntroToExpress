@@ -1,0 +1,16 @@
+{
+  "name": "task-express-introtoexpress",
+  "version": "1.0.0",
+  "description": "In this task you will setup your first Express app and create one endpoint that returns a list of all products.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
