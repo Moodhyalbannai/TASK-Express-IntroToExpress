@@ -1,3 +1,4 @@
+const { json } = require("express/lib/response");
 const accounts = require("../../accounts");
 
 const getAllAccounts = (req, res) => {
@@ -22,14 +23,24 @@ const getAccountById = (req, res) => {
 
 const getAccountByUsername = (req, res) => {
   const { username } = req.params;
+  const { currency } = req.query;
   const foundByName = accounts.find((account) => {
     return account.username == username;
   });
   if (!foundByName) {
     return res.status(404).json({ message: "Account by name not found" });
   }
+  if (currency && currency.toLocaleLowerCase() == "usd") {
+    const conversionRate = 3.3;
+    const convertedFunds = foundByName.funds * conversionRate;
+
+    res.status(200).json({
+      ...foundByName,
+      funds: `$${convertedFunds}`,
+    });
+  }
+
   res.status(200).json(foundByName);
-  console.log(foundByName);
 };
 
 const deleteAccount = (req, res) => {
@@ -69,26 +80,6 @@ const updateAccount = (req, res) => {
     account: accountToUpdate,
   });
 };
-
-// app.get("/accounts/query/:username", (req, res) => {
-//   const { username } = req.params;
-//   const { currency } = req.query;
-//   if (accounts[username]) {
-//     //if username exists inside accounts
-//     accountInfo = { ...accounts[username] }; //then show the account with that username
-//   }
-//   console.log(accounts[username]);
-
-//   if (!accounts[username]) {
-//     return res.status(404).json({ message: "Account by name not found" });
-//   }
-
-//   if (currency && currency.toLocaleLowerCase() != "usd" || "USD") {
-//     const conversionRate = 3.3;
-//     accountInfo.funds * conversionRate;
-//   }
-//   return res.json(accountInfo);
-// });
 
 module.exports = {
   getAllAccounts,
