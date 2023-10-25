@@ -26,26 +26,55 @@ const getAccountById = async (req, res) => {
   res.status(200).json(foundById);
 };
 
+// const getAccountByUsername = async (req, res) => {
+//   const { username } = req.params;
+//   const { currency } = req.query;
+//   // const foundByName = accounts.find((account) => {
+//   //   return account.username == username});
+//   const foundByName = await Account.findOne({ username: username });
+//   if (!foundByName) {
+//     return res.status(404).json({ message: "Account by name not found" });
+//   }
+//   if (currency && currency.toLocaleLowerCase() == "usd") {
+//     const conversionRate = 3.3;
+//     const convertedFunds = foundByName.funds * conversionRate;
+
+//     res.status(200).json({
+//       ...foundByName,
+//       funds: `$${convertedFunds}`,
+//     });
+//   }
+
+//   res.status(200).json(foundByName);
+// };
+
 const getAccountByUsername = async (req, res) => {
   const { username } = req.params;
   const { currency } = req.query;
-  // const foundByName = accounts.find((account) => {
-  //   return account.username == username});
-  const foundByName = await Account.findOne({ username: username });
-  if (!foundByName) {
-    return res.status(404).json({ message: "Account by name not found" });
-  }
-  if (currency && currency.toLocaleLowerCase() == "usd") {
-    const conversionRate = 3.3;
-    const convertedFunds = foundByName.funds * conversionRate;
 
-    res.status(200).json({
-      ...foundByName,
-      funds: `$${convertedFunds}`,
-    });
-  }
+  try {
+    const foundByName = await Account.findOne({ username: username });
 
-  res.status(200).json(foundByName);
+    if (!foundByName) {
+      return res.status(404).json({ message: "Account by name not found" });
+    }
+
+    if (currency && currency.toLowerCase() === "usd") {
+      const conversionRate = 3.3;
+      const convertedFunds = foundByName.funds * conversionRate;
+
+      return res.status(200).json({
+        ...foundByName.toObject(),
+        funds: `$${convertedFunds}`,
+      });
+    }
+
+    return res.status(200).json(foundByName);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: error.message || "Internal Server Error" });
+  }
 };
 
 const deleteAccount = async (req, res) => {
@@ -62,7 +91,7 @@ const deleteAccount = async (req, res) => {
   // accounts.length = 0; //clear the original array
   // //   console.log(accounts);
   // accounts.push(...updatedAccounts); //update the original array without the account deleted
-  await Account.deleteOne();
+  await Account.deleteOne({ _id: accountId });
 
   return res.status(200).json({ message: "Account deleted successfully" });
 };
@@ -91,6 +120,21 @@ const updateAccount = async (req, res) => {
   });
 };
 
+const getVipAccounts = async (req, res) => {
+  const { balance } = req.query;
+  if (!balance) {
+    return res.status(400).json({ message: "Balance parameter is required" });
+  }
+  try {
+    const vipAccounts = await Account.find({
+      funds: { $gte: parseInt(balance) },
+    });
+    res.status(200).json(vipAccounts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getAllAccounts,
   createNewAccount,
@@ -98,4 +142,5 @@ module.exports = {
   getAccountByUsername,
   deleteAccount,
   updateAccount,
+  getVipAccounts,
 };

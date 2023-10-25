@@ -7,6 +7,7 @@ const {
   getAccountByUsername,
   deleteAccount,
   updateAccount,
+  getVipAccounts,
 } = require("./accounts.controllers");
 
 router.get("/accounts", getAllAccounts);
@@ -20,5 +21,7 @@ router.get("/accounts/username/:username", getAccountByUsername);
 router.delete("/accounts/:accountId", deleteAccount);
 
 router.put("/accounts/:accountId", updateAccount);
+
+router.get("/accounts/vip/accounts", getVipAccounts);
 
 module.exports = router;
